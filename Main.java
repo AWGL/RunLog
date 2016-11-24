@@ -25,11 +25,11 @@ public class Main {
 
     public static void main(String[] args) {
 
-        final String version = "1.0.1";
+        final String version = "1.0.2";
 
         if (args.length != 2){
             System.err.println("RunLog v" +version);
-            System.err.println("Usage: RunLog <SampleSheet.csv> <RunInfo.xml>");
+            System.err.println("Usage: RunLog <SampleSheet.csv> <RunParameters.xml>");
             System.err.println("Prints information about an Illumina sequencing run");
             System.exit(1);
         }
