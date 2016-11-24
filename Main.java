@@ -2,12 +2,15 @@ package nhs.genetics.cardiff;
 
 import nhs.genetics.cardiff.framework.IlluminaRunParametersFile;
 import nhs.genetics.cardiff.framework.IlluminaSampleSheetFile;
+import nhs.genetics.cardiff.framework.IlluminaSampleSheetRecord;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,7 +18,7 @@ import java.util.logging.Logger;
  * A program for reporting Illumina sequencing audits
  *
  * @author  Matt Lyon
- * @version 1.0
+ * @version 1.1
  * @since   2016-06-15
  */
 public class Main {
@@ -23,7 +26,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        final String version = "1.0.0";
+        final String version = "1.0.1";
 
         if (args.length != 2){
             System.err.println("RunLog v" +version);
@@ -48,7 +51,7 @@ public class Main {
             illuminaRunParametersFile.parseRunParametersXml();
 
             /*Headers*/
-            if (printHeaders) printWriter.println("Instrument\tRunId\tRunStartDate\tApplication\tAssay\tChemistry\tRead1Cycles\tRead2Cycles\tSampleSheetDate\tDescription\tExperimentName\tInvestigatorName\tWorkflow\tMCSVersion\tRTAVerison\tFlowcellPartNo\tFlowcellSerialNo\tFlowcellExpireDate\tPR2PartNo\tPR2SerialNo\tPR2ExpiryDate\tReagentPartNo\tReagentSerialNo\tReagentExpiryDate");
+            if (printHeaders) printWriter.println("Instrument\tRunId\tRunStartDate\tApplication\tAssay\tChemistry\tRead1Cycles\tRead2Cycles\tSampleSheetDate\tDescription\tExperimentName\tPlates\tInvestigatorName\tWorkflow\tMCSVersion\tRTAVerison\tFlowcellPartNo\tFlowcellSerialNo\tFlowcellExpireDate\tPR2PartNo\tPR2SerialNo\tPR2ExpiryDate\tReagentPartNo\tReagentSerialNo\tReagentExpiryDate");
 
             /*RunInfo*/
             printWriter.print(illuminaRunParametersFile.getScannerID()); printWriter.print("\t");
@@ -64,6 +67,19 @@ public class Main {
             printWriter.print(simpleDateFormat.format(illuminaSampleSheetFile.getDate())); printWriter.print("\t");
             printWriter.print(illuminaSampleSheetFile.getDescription()); printWriter.print("\t");
             printWriter.print(illuminaSampleSheetFile.getExperimentName()); printWriter.print("\t");
+
+            HashSet<String> plateIds = new HashSet<>();
+            String plateConcat = "";
+
+            for (IlluminaSampleSheetRecord illuminaSampleSheetRecord : illuminaSampleSheetFile.getSampleSheetRecords()){
+                plateIds.add(illuminaSampleSheetRecord.getSamplePlate());
+            }
+
+            for (String plateId : plateIds){
+                plateConcat = plateConcat + plateId + ",";
+            }
+
+            printWriter.print(plateConcat); printWriter.print("\t");
             printWriter.print(illuminaSampleSheetFile.getInvestigatorName()); printWriter.print("\t");
             printWriter.print(illuminaSampleSheetFile.getWorkflow()); printWriter.print("\t");
 
@@ -88,7 +104,7 @@ public class Main {
 
             printWriter.close();
         } catch (IOException e){
-            log.log(Level.SEVERE, "Could not parse file: " + e.getMessage());
+            log.log(Level.SEVERE, "Error reading or writing files: " + e.getMessage());
             System.exit(1);
         }
 
